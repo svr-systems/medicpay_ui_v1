@@ -4,4 +4,10 @@ module.exports = defineConfig({
   devServer: {
     port: 8085,
   },
+  pages: {
+    index: {
+      entry: "src/main.js",
+      title: "SVR Software",
+    },
+  },
 });

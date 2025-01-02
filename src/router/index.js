@@ -5,6 +5,77 @@ import store from "@/store";
 Vue.use(VueRouter);
 
 const routes = [
+  //users
+  {
+    path: "/usuarios",
+    name: "users",
+    component: () => import("@/views/users/Index.vue"),
+    meta: {
+      title: "Usuarios",
+      icon: "mdi-account-multiple",
+      req_auth: true,
+      permission: true,
+    },
+  },
+  {
+    path: "/usuarios/agregar",
+    name: "users.store",
+    component: () => import("@/views/users/StoreUpdate.vue"),
+    meta: {
+      title: "Usuario | Agregar",
+      icon: "mdi-account",
+      req_auth: true,
+      permission: true,
+    },
+  },
+  {
+    path: "/usuarios/:id",
+    name: "users.show",
+    component: () => import("@/views/users/Show.vue"),
+    meta: {
+      title: "Usuario",
+      icon: "mdi-account",
+      req_auth: true,
+      permission: true,
+    },
+    props: true,
+  },
+  {
+    path: "/usuarios/:id/editar",
+    name: "users.update",
+    component: () => import("@/views/users/StoreUpdate.vue"),
+    meta: {
+      title: "Usuario | Editar",
+      icon: "mdi-account",
+      req_auth: true,
+      permission: true,
+    },
+    props: true,
+  },
+  {
+    path: "/mi_perfil",
+    name: "users.profile",
+    component: () => import("@/views/users/Show.vue"),
+    meta: {
+      title: "Mi perfil",
+      icon: "mdi-card-account-details",
+      req_auth: true,
+      permission: true,
+    },
+    props: true,
+  },
+  {
+    path: "/mi_perfil/editar",
+    name: "users.profile_update",
+    component: () => import("@/views/users/StoreUpdate.vue"),
+    meta: {
+      title: "Mi perfil | Editar",
+      icon: "mdi-card-account-details",
+      req_auth: true,
+      permission: true,
+    },
+    props: true,
+  },
   //general
   {
     path: "/",
@@ -19,7 +90,7 @@ const routes = [
     name: "login",
     component: () => import("@/views/general/Login.vue"),
     meta: {
-      title: "INICIAR SESIÓN",
+      title: "Iniciar Sesión",
     },
   },
   {
@@ -27,7 +98,7 @@ const routes = [
     name: "home",
     component: () => import("@/views/general/Home.vue"),
     meta: {
-      title: "INICIO",
+      title: "Inicio",
       req_auth: true,
       permission: true,
     },
@@ -37,7 +108,7 @@ const routes = [
     name: "unauthorized",
     component: () => import("@/views/general/Unauthorized.vue"),
     meta: {
-      title: "ACCESO DENEGADO",
+      title: "Acceso Denegado",
       req_auth: true,
       permission: true,
     },

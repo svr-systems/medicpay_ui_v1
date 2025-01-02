@@ -1,4 +1,4 @@
-export const VERSION = "v1.24.12.29";
+export const VERSION = "v1.25.01.01";
 export const APP_NAME = "SVR-APP";
 
 const URL = "http://127.0.0.1:8000";
@@ -27,28 +27,10 @@ export const getRsp = (rsp) => {
 };
 
 export const getErr = (obj) => {
-  let err = null;
-  const msg_gen = "Error. Contacte al equipo de desarrollo";
-
-  if (obj.msg) {
-    err = obj;
-  } else {
-    if (obj.name && obj.name == "AxiosError") {
-      err = {
-        msg: msg_gen,
-        err: obj,
-      };
-    } else {
-      if (obj.response.data.err) {
-        err = obj.response.data;
-      } else {
-        err = {
-          msg: msg_gen,
-          err: obj.response.request.response,
-        };
-      }
-    }
-  }
+  const err = {
+    msg: obj.response.data.msg,
+    err: obj.response.data.data,
+  };
 
   console.log(err.err);
 
@@ -105,15 +87,28 @@ export const getRules = () => {
       (v) =>
         /([!@$%*])/.test(v) || "Al menos un caractere especial (! @ $ % *).",
     ],
-    fileLmt: [
+    docLmt: [
       (v) => !!v || "Campo requerido.",
-      (v) => (v && v.size <= 786432) || "El tamaño máximo de carga es de 768kB",
+      (v) => (v && v.size <= 1048576) || "El tamaño máximo de carga es de 1MB",
     ],
-    fileLmtNR: [
+    docLmtNR: [
       (v) => {
         if (v)
           return (
-            (v && v.size <= 786432) || "El tamaño máximo de carga es de 768kB"
+            (v && v.size <= 1048576) || "El tamaño máximo de carga es de 1MB"
+          );
+        else return true;
+      },
+    ],
+    imgLmt: [
+      (v) => !!v || "Campo requerido.",
+      (v) => (v && v.size <= 3145728) || "El tamaño máximo de carga es de 3MB",
+    ],
+    imgLmtNR: [
+      (v) => {
+        if (v)
+          return (
+            (v && v.size <= 3145728) || "El tamaño máximo de carga es de 3MB"
           );
         else return true;
       },

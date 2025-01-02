@@ -12,8 +12,8 @@ export default new Vuex.Store({
     },
   },
   mutations: {
-    LOGIN: (state, data) => {
-      state.auth = data;
+    LOGIN: (state, auth) => {
+      state.auth = auth;
     },
     LOGOUT: (state) => {
       state.auth = null;
@@ -21,16 +21,22 @@ export default new Vuex.Store({
     THEMEDARK: (state) => {
       state.conf.theme_dark = !state.conf.theme_dark;
     },
+    PROFILE: (state, item) => {
+      state.auth.user = item;
+    },
   },
   actions: {
-    loginAction: (context, data) => {
-      context.commit("LOGIN", data);
+    loginAction: (context, auth) => {
+      context.commit("LOGIN", auth);
     },
     logoutAction: (context) => {
       context.commit("LOGOUT");
     },
     themeDarkAction: (context) => {
       context.commit("THEMEDARK");
+    },
+    profileAction: (context, item) => {
+      context.commit("PROFILE", item);
     },
   },
   getters: {

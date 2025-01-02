@@ -2,11 +2,11 @@
   <v-navigation-drawer v-model="drawerVal" fixed temporary app clipped>
     <v-list-item>
       <v-list-item-avatar>
-        <v-img src="https://randomuser.me/api/portraits/men/85.jpg" />
+        <VisAvatar :val="$store.getters.getAuth.user.avatar_b64" size="40" />
       </v-list-item-avatar>
       <v-list-item-title>
         <div class="user-name">
-          {{ $store.getters.getAuth.user.name }}
+          {{ $store.getters.getAuth.user.full_name }}
         </div>
         <div class="user-email">
           {{ $store.getters.getAuth.user.email }}
@@ -60,11 +60,15 @@
 </template>
 
 <script>
-import { VERSION, URL_API, getHdrs, getRsp, getErr } from "@/exports";
+import { VERSION, URL_API, getHdrs, getErr } from "@/exports";
 import Axios from "axios";
+import VisAvatar from "@/components/VisAvatar.vue";
 
 export default {
   props: ["drawer"],
+  components: {
+    VisAvatar,
+  },
   data() {
     return {
       version: VERSION,
@@ -97,14 +101,7 @@ export default {
             getHdrs(this.$store.getters.getAuth.token)
           )
             .then((rsp) => {
-              rsp = getRsp(rsp);
-
-              if (rsp.ok) {
-                this.logout();
-              } else {
-                this.$root.$alert("error", getErr(rsp));
-                this.logout();
-              }
+              this.logout();
             })
             .catch((err) => {
               this.$root.$alert("error", getErr(err));
@@ -120,6 +117,18 @@ export default {
         link: "home",
         title: "Inicio",
         icon: "mdi-home",
+        show: true,
+      },
+      {
+        link: "users",
+        title: "Usuarios",
+        icon: "mdi-account-multiple",
+        show: true,
+      },
+      {
+        link: "users.profile",
+        title: "Mi perfil",
+        icon: "mdi-card-account-details",
         show: true,
       },
     ];

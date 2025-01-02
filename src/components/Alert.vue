@@ -3,6 +3,7 @@
     v-model="visible"
     app
     top
+    elevation="12"
     :color="color"
     timeout="4000"
     transition="slide-y-transition"

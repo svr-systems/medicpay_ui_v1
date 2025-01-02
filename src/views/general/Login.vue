@@ -25,10 +25,11 @@
                     <v-text-field
                       v-model="data.email"
                       label="E-mail"
-                      type="text"
                       dense
-                      maxlength="50"
+                      outlined
+                      type="text"
                       :rules="rules.email"
+                      maxlength="50"
                       prepend-icon="mdi-account"
                     />
                   </v-col>
@@ -36,7 +37,7 @@
                     <InpPassword
                       :model.sync="data.password"
                       label="Contraseña"
-                      :rules="rules.password"
+                      :rules="rules.required"
                     />
                   </v-col>
                   <v-col cols="12">
@@ -99,14 +100,8 @@ export default {
         Axios.post(URL_API + "/auth/login", this.data, getHdrs())
           .then((rsp) => {
             rsp = getRsp(rsp);
-
-            if (rsp.ok) {
-              this.$store.dispatch("loginAction", rsp.data);
-              this.$router.push({ name: "home" });
-            } else {
-              this.$root.$alert("error", getErr(rsp));
-            }
-
+            this.$store.dispatch("loginAction", rsp.data.auth);
+            this.$router.push({ name: "home" });
             this.ldg = false;
           })
           .catch((err) => {
