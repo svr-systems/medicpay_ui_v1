@@ -277,13 +277,16 @@ export default {
         this.$root
           .$confirm(
             "¿Confirma " +
-              (this.store_mode ? " agregar" : " editar") +
-              " registro?"
+              (this.store_mode ? "agregar" : "editar") +
+              " " +
+              (this.profile_mode ? "perfil" : "registro") +
+              "?"
           )
           .then((confirmed) => {
             if (confirmed) {
               this.ldg = true;
               let obj = getObj(this.item, this.store_mode);
+              obj.profile_mode = this.profile_mode;
 
               Axios.post(
                 URL_API +

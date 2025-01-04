@@ -1,8 +1,24 @@
-export const VERSION = "v1.25.01.01";
+export const APP_VERSION = "v1.25.01.01";
 export const APP_NAME = "SVR-APP";
 
+// const URL = "https://svr.com.mx/serv";
 const URL = "http://127.0.0.1:8000";
 export const URL_API = URL + "/api";
+
+export const ROUTES = [
+  {
+    link: "home",
+    title: "Inicio",
+    icon: "mdi-home",
+    show: true,
+  },
+  {
+    link: "users",
+    title: "Usuarios",
+    icon: "mdi-account-multiple",
+    show: true,
+  },
+];
 
 export const getHdrs = (token = null, form_data = false) => {
   let headers = {

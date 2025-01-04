@@ -16,26 +16,35 @@
         </div>
       </v-list-item-title>
     </v-list-item>
-
     <v-divider />
-
     <v-list dense nav>
       <v-list-item
-        v-for="(item, i) in items"
+        v-for="(route, i) in routes"
         :key="i"
-        :to="{ name: item.link }"
-        v-if="item.show"
+        :to="{ name: route.link }"
+        v-if="route.show"
         link
       >
         <v-list-item-icon class="mr-0">
           <v-icon small>
-            {{ item.icon }}
+            {{ route.icon }}
           </v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-title>
-            {{ item.title }}
+            {{ route.title }}
           </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+    </v-list>
+    <v-divider />
+    <v-list dense nav>
+      <v-list-item :to="{ name: 'users.profile' }" link>
+        <v-list-item-icon class="mr-0">
+          <v-icon small> mdi-card-account-details </v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title> Mi perfil </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
       <v-list-item link @click.prevent="logoutHandle">
@@ -46,6 +55,9 @@
           <v-list-item-title> Cerrar Sesión </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
+    </v-list>
+    <v-divider />
+    <v-list dense nav>
       <v-list-item>
         <v-list-item-content>
           <v-list-item-title>
@@ -60,7 +72,7 @@
 </template>
 
 <script>
-import { VERSION, URL_API, getHdrs, getErr } from "@/exports";
+import { APP_VERSION, ROUTES, URL_API, getHdrs, getErr } from "@/exports";
 import Axios from "axios";
 import VisAvatar from "@/components/VisAvatar.vue";
 
@@ -71,9 +83,9 @@ export default {
   },
   data() {
     return {
-      version: VERSION,
+      version: APP_VERSION,
       auth: this.$store.getters.getAuth,
-      items: [],
+      routes: ROUTES,
     };
   },
   computed: {
@@ -110,28 +122,6 @@ export default {
         }
       });
     },
-  },
-  mounted() {
-    this.items = [
-      {
-        link: "home",
-        title: "Inicio",
-        icon: "mdi-home",
-        show: true,
-      },
-      {
-        link: "users",
-        title: "Usuarios",
-        icon: "mdi-account-multiple",
-        show: true,
-      },
-      {
-        link: "users.profile",
-        title: "Mi perfil",
-        icon: "mdi-card-account-details",
-        show: true,
-      },
-    ];
   },
 };
 </script>
