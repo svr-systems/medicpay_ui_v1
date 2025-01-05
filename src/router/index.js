@@ -5,6 +5,53 @@ import store from "@/store";
 Vue.use(VueRouter);
 
 const routes = [
+  //examples
+  {
+    path: "/ejemplos",
+    name: "examples",
+    component: () => import("@/views/examples/Index.vue"),
+    meta: {
+      title: "Ejemplos",
+      icon: "mdi-tag-multiple",
+      req_auth: true,
+      permission: true,
+    },
+  },
+  {
+    path: "/ejemplos/agregar",
+    name: "examples.store",
+    component: () => import("@/views/examples/StoreUpdate.vue"),
+    meta: {
+      title: "Ejemplo | Agregar",
+      icon: "mdi-tag",
+      req_auth: true,
+      permission: true,
+    },
+  },
+  {
+    path: "/ejemplos/:id",
+    name: "examples.show",
+    component: () => import("@/views/examples/Show.vue"),
+    meta: {
+      title: "Ejemplo",
+      icon: "mdi-tag",
+      req_auth: true,
+      permission: true,
+    },
+    props: true,
+  },
+  {
+    path: "/ejemplos/:id/editar",
+    name: "examples.update",
+    component: () => import("@/views/examples/StoreUpdate.vue"),
+    meta: {
+      title: "Ejemplo | Editar",
+      icon: "mdi-tag",
+      req_auth: true,
+      permission: true,
+    },
+    props: true,
+  },
   //users
   {
     path: "/usuarios",

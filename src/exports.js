@@ -13,6 +13,12 @@ export const ROUTES = [
     show: true,
   },
   {
+    link: "examples",
+    title: "Ejemplos",
+    icon: "mdi-tag-multiple",
+    show: true,
+  },
+  {
     link: "users",
     title: "Usuarios",
     icon: "mdi-account-multiple",
