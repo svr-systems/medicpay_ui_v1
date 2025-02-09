@@ -100,6 +100,8 @@ export default {
       items: [],
       items_srch: "",
       items_hdrs: [],
+      //CATALOGS
+      //OTHERS
     };
   },
   methods: {
