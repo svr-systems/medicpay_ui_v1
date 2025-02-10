@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import { getBlob } from "@/exports";
+import { getBlob } from "@/general";
 
 export default {
   props: ["val", "lab", "icon", "size"],

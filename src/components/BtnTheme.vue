@@ -1,8 +1,8 @@
 <template>
   <v-tooltip left>
     <template v-slot:activator="{ on }">
-      <v-btn :small="isSmall" v-on="on" icon @click.prevent="themeDarkAction">
-        <v-icon :small="isSmall"> mdi-brightness-6 </v-icon>
+      <v-btn small v-on="on" icon @click.prevent="themeDarkAction">
+        <v-icon small> mdi-brightness-6 </v-icon>
       </v-btn>
     </template>
     Utilizar modo: {{ $store.getters.getConf.theme_dark ? "Obscuro" : "Claro" }}
@@ -16,7 +16,6 @@ export default {
     color: null,
     msg: null,
     visible: false,
-    isSmall: false,
   }),
   methods: {
     themeDarkHandle() {
@@ -28,7 +27,6 @@ export default {
     },
   },
   mounted() {
-    this.isSmall = typeof this.small !== "undefined";
     this.themeDarkHandle();
   },
 };

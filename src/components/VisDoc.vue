@@ -77,7 +77,7 @@
 </template>
 
 <script>
-import { getBlob, getDateTime } from "@/exports";
+import { getBlob, getDateTime } from "@/general";
 import CardTitle from "@/components/CardTitle.vue";
 
 export default {

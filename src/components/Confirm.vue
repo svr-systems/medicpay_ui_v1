@@ -1,16 +1,16 @@
 <template>
-  <v-dialog v-model="visible" persistent overlay-color="black" max-width="270">
-    <v-card flat>
+  <v-dialog v-model="visible" persistent overlay-color="black" max-width="400">
+    <v-card elevation="24" flat>
       <v-card-title />
       <v-card-text v-if="msg">
         <v-row dense class="text-center">
           <v-col cols="12">
             <v-icon color="warning" size="64">
-              mdi-alert-rhombus-outline
+              mdi-alert-octagon-outline
             </v-icon>
           </v-col>
           <v-col cols="12">
-            <div class="subtitle-1 pt-2">
+            <div class="title pt-2">
               {{ msg }}
             </div>
           </v-col>

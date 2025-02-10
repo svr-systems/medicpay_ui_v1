@@ -9,7 +9,8 @@ import Confirm from "@/components/Confirm";
 Vue.component("Alert", Alert);
 Vue.component("Confirm", Confirm);
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
+Vue.prototype.$window = window;
 
 new Vue({
   router,

@@ -1,30 +1,8 @@
-export const APP_VERSION = "v1.25.01.01";
+export const APP_VERSION = "1.02.09";
 export const APP_NAME = "SVR-APP";
 
-// const URL = "https://svr.com.mx/serv";
 const URL = "http://127.0.0.1:8000";
 export const URL_API = URL + "/api";
-
-export const ROUTES = [
-  {
-    link: "home",
-    title: "Inicio",
-    icon: "mdi-home",
-    show: true,
-  },
-  {
-    link: "examples",
-    title: "Ejemplos",
-    icon: "mdi-tag-multiple",
-    show: true,
-  },
-  {
-    link: "users",
-    title: "Usuarios",
-    icon: "mdi-account-multiple",
-    show: true,
-  },
-];
 
 export const getHdrs = (token = null, form_data = false) => {
   let headers = {
@@ -79,19 +57,25 @@ export const getDateTime = (sprDate = "-", sprBwn = " ", sprTime = ":") => {
 
 export const getRules = () => {
   return {
-    required: [(v) => !!v || "Campo requerido."],
-    requiredTxt: [
+    rqd: [(v) => !!v || "Campo requerido."],
+    txt_rqd: [
       (v) => !!v || "Campo requerido.",
       (v) => (v && v.trim().length >= 2) || "Mínimo 2 caracteres.",
     ],
-    email: [
+    txt: [
+      (v) => {
+        if (v) return (v && v.length >= 2) || "Mínimo 2 caracteres.";
+        else return true;
+      },
+    ],
+    email_rqd: [
       (v) => !!v || "Campo requerido.",
-      (v) => (v && v.length <= 50) || "Máximo 50 caracteres.",
+      (v) => (v && v.length <= 65) || "Máximo 65 caracteres.",
       (v) => /.+@.+\..+/.test(v) || "Formato invalido.",
     ],
-    emailNR: [
+    email: [
       (v) => {
-        if (v) return (v && v.length <= 50) || "Máximo 50 caracteres.";
+        if (v) return (v && v.length <= 65) || "Máximo 65 caracteres.";
         else return true;
       },
       (v) => {
@@ -99,7 +83,7 @@ export const getRules = () => {
         else return true;
       },
     ],
-    password: [
+    password_rqd: [
       (v) => !!v || "Campo requerido.",
       (v) => (v && v.length >= 8) || "Mínimo 8 caracteres.",
       (v) => (v && v.length <= 15) || "Máximo 15 caracteres.",
@@ -109,11 +93,11 @@ export const getRules = () => {
       (v) =>
         /([!@$%*])/.test(v) || "Al menos un caractere especial (! @ $ % *).",
     ],
-    docLmt: [
+    doc_rqd: [
       (v) => !!v || "Campo requerido.",
       (v) => (v && v.size <= 1048576) || "El tamaño máximo de carga es de 1MB",
     ],
-    docLmtNR: [
+    doc: [
       (v) => {
         if (v)
           return (
@@ -122,16 +106,32 @@ export const getRules = () => {
         else return true;
       },
     ],
-    imgLmt: [
+    img_rqd: [
       (v) => !!v || "Campo requerido.",
-      (v) => (v && v.size <= 3145728) || "El tamaño máximo de carga es de 3MB",
+      (v) => (v && v.size <= 2097152) || "El tamaño máximo de carga es de 2MB",
     ],
-    imgLmtNR: [
+    img: [
       (v) => {
         if (v)
           return (
-            (v && v.size <= 3145728) || "El tamaño máximo de carga es de 3MB"
+            (v && v.size <= 2097152) || "El tamaño máximo de carga es de 2MB"
           );
+        else return true;
+      },
+    ],
+    fiscal_code_rqd: [
+      (v) => !!v || "Campo requerido.",
+      (v) => (v && v.length <= 13) || "Máximo 13 caracteres.",
+      (v) => /^[A-Za-zñÑ&]{3,4}\d{6}\w{3}$/.test(v) || "Formato invalido.",
+    ],
+    fiscal_code: [
+      (v) => {
+        if (v) return (v && v.length <= 13) || "Máximo 13 caracteres.";
+        else return true;
+      },
+      (v) => {
+        if (v)
+          return /^[A-Za-zñÑ&]{3,4}\d{6}\w{3}$/.test(v) || "Formato invalido.";
         else return true;
       },
     ],
@@ -148,12 +148,16 @@ export const getObj = (data, store = false) => {
   return obj;
 };
 
-export const getDocs = (obj, prop, subprop) => {
-  for (let item of obj[prop]) {
-    obj[prop.substring(0, prop.length - 1) + "_doc_" + i] = item[subprop];
-    i++;
-  }
+export const getPropDocs = (obj, prop, subprop) => {
+  obj[prop].forEach(function (item, i) {
+    obj[prop + "_" + subprop + "_" + i] = item[subprop];
+  });
 
+  return obj;
+};
+
+export const getPropDoc = (obj, prop, subprop) => {
+  obj[prop + "_" + subprop] = obj[prop][subprop];
   return obj;
 };
 
@@ -168,7 +172,13 @@ export const getFormData = (data) => {
     ) {
       form_data.append(key, JSON.stringify(data[key]));
     } else {
-      form_data.append(key, data[key]);
+      form_data.append(
+        key,
+        data[key] == null ||
+          (typeof data[key] == "string" && data[key].trim() == "")
+          ? ""
+          : data[key]
+      );
     }
   });
 
@@ -186,5 +196,14 @@ export const getBlob = (b64, ext) => {
 
   return new Blob([bytes.buffer], {
     type: "application/" + ext,
+  });
+};
+
+export const getAmountFormat = (v) => {
+  return Number(
+    parseFloat(v == null || v == "" ? 0 : v).toFixed(2)
+  ).toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
   });
 };

@@ -15,7 +15,7 @@
       <BtnTheme />
     </v-app-bar>
     <v-main>
-      <v-container fluid>
+      <v-container>
         <router-view :key="$route.fullPath" />
       </v-container>
     </v-main>
@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { VERSION, APP_NAME } from "@/exports";
+import { APP_NAME } from "@/general";
 import SideBar from "@/components/SideBar.vue";
 import BtnTheme from "@/components/BtnTheme.vue";
 
@@ -34,7 +34,6 @@ export default {
   },
   data() {
     return {
-      version: VERSION,
       app_name: APP_NAME,
       drawer: false,
     };

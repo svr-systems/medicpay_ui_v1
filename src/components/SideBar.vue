@@ -5,64 +5,57 @@
         <VisAvatar :val="$store.getters.getAuth.user.avatar_b64" size="40" />
       </v-list-item-avatar>
       <v-list-item-title>
-        <div class="user-name">
+        <div class="user-name pt-1">
           {{ $store.getters.getAuth.user.full_name }}
         </div>
         <div class="user-email">
           {{ $store.getters.getAuth.user.email }}
         </div>
         <div class="user-role">
-          {{ $store.getters.getAuth.user.role.name }}
+          {{ $store.getters.getAuth.user.role.name }} |
+          {{ $store.getters.getAuth.user.uiid }}
+        </div>
+        <div class="py-1">
+          <v-btn text x-small width="76" @click.prevent="logoutHandle">
+            Cerrar Sesión
+          </v-btn>
         </div>
       </v-list-item-title>
     </v-list-item>
     <v-divider />
-    <v-list dense nav>
-      <v-list-item
-        v-for="(route, i) in routes"
-        :key="i"
-        :to="{ name: route.link }"
-        v-if="route.show"
-        link
-      >
-        <v-list-item-icon class="mr-0">
-          <v-icon small>
-            {{ route.icon }}
-          </v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-title>
-            {{ route.title }}
-          </v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
-    </v-list>
-    <v-divider />
-    <v-list dense nav>
-      <v-list-item :to="{ name: 'users.profile' }" link>
-        <v-list-item-icon class="mr-0">
-          <v-icon small> mdi-card-account-details </v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-title> Mi perfil </v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
-      <v-list-item link @click.prevent="logoutHandle">
-        <v-list-item-icon class="mr-0">
-          <v-icon small> mdi-logout-variant </v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-title> Cerrar Sesión </v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
-    </v-list>
-    <v-divider />
+    <div v-for="(item, i) in side_bar_items" :key="i">
+      <div v-if="item.links">
+        <v-list dense nav>
+          <v-list-item
+            v-for="(link, i) in item.links"
+            :key="i"
+            :to="{ name: link.link }"
+            v-if="link.show"
+            link
+          >
+            <v-list-item-icon class="mr-0">
+              <v-icon small>
+                {{ link.icon }}
+              </v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>
+                {{ link.title }}
+              </v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </div>
+      <div v-if="item.divider">
+        <v-divider />
+      </div>
+    </div>
     <v-list dense nav>
       <v-list-item>
         <v-list-item-content>
           <v-list-item-title>
             <small>
-              {{ version }}
+              {{ app_version }}
             </small>
           </v-list-item-title>
         </v-list-item-content>
@@ -72,7 +65,8 @@
 </template>
 
 <script>
-import { APP_VERSION, ROUTES, URL_API, getHdrs, getErr } from "@/exports";
+import { APP_VERSION, URL_API, getHdrs, getErr } from "@/general";
+import { getSideBarItems } from "@/router/sideBarItems";
 import Axios from "axios";
 import VisAvatar from "@/components/VisAvatar.vue";
 
@@ -83,9 +77,9 @@ export default {
   },
   data() {
     return {
-      version: APP_VERSION,
+      app_version: APP_VERSION,
       auth: this.$store.getters.getAuth,
-      routes: ROUTES,
+      side_bar_items: getSideBarItems(),
     };
   },
   computed: {
@@ -128,13 +122,16 @@ export default {
 
 <style scoped>
 .user-name {
-  font-size: 12px;
+  font-size: 10px;
 }
 .user-email {
-  font-size: 10px;
+  font-size: 9px;
 }
 .user-role {
   padding-top: 5px;
-  font-size: 8px;
+  font-size: 7px !important;
+}
+.v-size--x-small {
+  font-size: 9px !important;
 }
 </style>

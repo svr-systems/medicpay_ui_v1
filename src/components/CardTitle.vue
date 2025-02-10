@@ -16,7 +16,6 @@ export default {
       v_sub: false,
     };
   },
-
   mounted() {
     this.v_icon = typeof this.icon != "undefined";
     this.v_sub = typeof this.sub != "undefined";

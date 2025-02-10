@@ -3,16 +3,11 @@
     <v-card-title>
       <v-row dense>
         <v-col cols="8">
-          <BtnBack
-            v-if="!profile_mode"
-            :route="{
-              name: route,
-            }"
-          />
+          <BtnBack :route="{ name: route }" />
           <CardTitle :text="$route.meta.title" :icon="$route.meta.icon" />
         </v-col>
-        <v-col cols="4" class="text-right">
-          <v-tooltip bottom>
+        <v-col v-if="item" cols="4" class="text-right">
+          <v-tooltip v-if="item.active" bottom>
             <template v-slot:activator="{ on }">
               <v-btn
                 v-on="on"
@@ -26,25 +21,19 @@
                 <v-icon small> mdi-lock-reset </v-icon>
               </v-btn>
             </template>
-            Modificar Contraseña
+            Modificar contraseña
           </v-tooltip>
-          <v-tooltip bottom>
+          <v-tooltip v-if="item.active" bottom>
             <template v-slot:activator="{ on }">
               <v-btn
                 v-on="on"
                 fab
                 x-small
                 color="warning"
-                :to="
-                  !profile_mode
-                    ? {
-                        name: route + '.update',
-                        params: { id: id },
-                      }
-                    : {
-                        name: route + '.profile_update',
-                      }
-                "
+                :to="{
+                  name: route + '.update',
+                  params: { id: $window.btoa(id) },
+                }"
               >
                 <v-icon small> mdi-pencil </v-icon>
               </v-btn>
@@ -56,12 +45,28 @@
     </v-card-title>
     <v-card-text v-if="item">
       <v-row>
+        <v-col v-if="!item.active" cols="12">
+          <v-alert dense outlined text shaped type="error">
+            <v-row dense>
+              <v-col class="grow"> El registro se encuentra inactivo </v-col>
+              <v-col
+                v-if="auth.user.role_id == 1 || auth.user.role_id == 2"
+                class="shrink"
+              >
+                <v-btn x-small color="success" @click="restoreItem">
+                  Activar
+                  <v-icon x-small right> mdi-delete-restore </v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-alert>
+        </v-col>
         <v-col cols="12">
           <v-card>
             <v-card-title class="card_title_border">
               <v-row dense>
                 <v-col cols="8">
-                  <CardTitle text="GENERAL" sub />
+                  <CardTitle :text="'GENERAL | ' + item.uiid" sub />
                 </v-col>
                 <v-col cols="4" class="text-right">
                   <v-tooltip bottom>
@@ -82,16 +87,16 @@
             </v-card-title>
             <v-card-text>
               <v-row dense>
-                <v-col cols="12" sm="12" md="3">
+                <v-col cols="12" md="3">
                   <VisVal :val="item.name" lab="Nombre" />
                 </v-col>
-                <v-col cols="12" sm="12" md="3">
+                <v-col cols="12" md="3">
                   <VisVal :val="item.surname_p" lab="A. paterno" />
                 </v-col>
-                <v-col cols="12" sm="12" md="3">
+                <v-col cols="12" md="3">
                   <VisVal :val="item.surname_m" lab="A. materno" />
                 </v-col>
-                <v-col cols="12" sm="12" md="3">
+                <v-col cols="12" md="3">
                   <VisDoc :val="item.avatar_b64" lab="Fotografía" img />
                 </v-col>
               </v-row>
@@ -110,18 +115,23 @@
             </v-card-title>
             <v-card-text>
               <v-row dense>
-                <v-col cols="12" sm="12" md="3">
+                <v-col cols="12" md="3">
                   <VisVal :val="item.email" lab="E-mail" />
                 </v-col>
-                <v-col cols="12" sm="12" md="3">
+                <v-col cols="12" md="3">
                   <VisVal :val="item.role.name" lab="Rol" />
                 </v-col>
               </v-row>
             </v-card-text>
           </v-card>
         </v-col>
-        <v-col cols="12">
-          <v-tooltip v-if="!profile_mode" right>
+        <v-col
+          v-if="
+            item.active && (auth.user.role_id == 1 || auth.user.role_id == 2)
+          "
+          cols="12"
+        >
+          <v-tooltip right>
             <template v-slot:activator="{ on }">
               <v-btn
                 v-on="on"
@@ -133,11 +143,12 @@
                 <v-icon small> mdi-delete </v-icon>
               </v-btn>
             </template>
-            Eliminar
+            Inactivar
           </v-tooltip>
         </v-col>
       </v-row>
     </v-card-text>
+    <!-- DIALOGS -->
     <DlgReg v-model="reg_dlg" :item="item" />
     <v-dialog
       v-model="password_dlg"
@@ -171,14 +182,14 @@
             </v-col>
           </v-row>
         </v-card-title>
-        <v-card-text v-if="password">
-          <v-form v-on:submit.prevent ref="password_form" lazy-validation>
+        <v-card-text v-if="password_data">
+          <v-form v-on:submit.prevent ref="password_data_form" lazy-validation>
             <v-row dense>
               <v-col cols="12">
                 <InpPassword
-                  :model.sync="password.password"
+                  :model.sync="password_data.password"
                   label="Contraseña"
-                  :rules="rules.password"
+                  :rules="rules.password_rqd"
                   counter
                 />
               </v-col>
@@ -210,7 +221,7 @@
 </template>
 
 <script>
-import { URL_API, getHdrs, getRsp, getErr, getRules } from "@/exports";
+import { URL_API, getHdrs, getRsp, getErr, getRules } from "@/general";
 import Axios from "axios";
 import BtnBack from "@/components/BtnBack.vue";
 import CardTitle from "@/components/CardTitle.vue";
@@ -231,21 +242,19 @@ export default {
   data() {
     return {
       route: "users",
-      id:
-        this.$route.params && this.$route.params.id
-          ? this.$route.params.id
-          : null,
+      id: this.$route.params.id
+        ? this.$window.atob(this.$route.params.id)
+        : null,
       auth: this.$store.getters.getAuth,
       ldg: true,
       item: null,
       reg_dlg: false,
       rules: getRules(),
       //DIALOGS
-      password: null,
+      password_data: null,
       password_dlg: false,
       password_dlg_ldg: false,
       //OTHERS
-      profile_mode: true,
     };
   },
   methods: {
@@ -253,7 +262,7 @@ export default {
       this.ldg = true;
 
       Axios.get(
-        URL_API + "/" + this.route + "/" + this.id,
+        URL_API + "/system/" + this.route + "/" + this.id,
         getHdrs(this.auth.token)
       )
         .then((rsp) => {
@@ -273,12 +282,12 @@ export default {
             this.ldg = true;
 
             Axios.delete(
-              URL_API + "/" + this.route + "/" + this.id,
+              URL_API + "/system/" + this.route + "/" + this.id,
               getHdrs(this.auth.token)
             )
               .then((rsp) => {
                 rsp = getRsp(rsp);
-                this.$root.$alert("warning", rsp.msg);
+                this.$root.$alert("error", rsp.msg);
                 this.$router.push({ name: this.route });
                 this.ldg = false;
               })
@@ -288,8 +297,32 @@ export default {
           }
         });
     },
+    restoreItem() {
+      this.$root
+        .$confirm("¿Confirma activar el registro?")
+        .then((confirmed) => {
+          if (confirmed) {
+            this.ldg = true;
+
+            Axios.post(
+              URL_API + "/system/" + this.route + "/restore",
+              { id: this.id },
+              getHdrs(this.auth.token)
+            )
+              .then((rsp) => {
+                rsp = getRsp(rsp);
+                this.$root.$alert("success", rsp.msg);
+                this.item = rsp.data.item;
+                this.ldg = false;
+              })
+              .catch((err) => {
+                this.$root.$alert("error", getErr(err));
+              });
+          }
+        });
+    },
     passwordDlg() {
-      this.password = {
+      this.password_data = {
         id: this.item.id,
         password: null,
       };
@@ -298,10 +331,10 @@ export default {
     },
     passwordDlgClose() {
       this.password_dlg = false;
-      this.$refs.password_form.reset();
+      this.$refs.password_data_form.reset();
     },
     passwordHandle() {
-      if (this.$refs.password_form.validate()) {
+      if (this.$refs.password_data_form.validate()) {
         this.$root
           .$confirm("¿Confirma modificar la contraseña?")
           .then((confirmed) => {
@@ -309,8 +342,8 @@ export default {
               this.password_dlg_ldg = true;
 
               Axios.post(
-                URL_API + "/" + this.route + "/password",
-                this.password,
+                URL_API + "/system/" + this.route + "/password",
+                this.password_data,
                 getHdrs(this.auth.token)
               )
                 .then((rsp) => {
@@ -331,11 +364,7 @@ export default {
     },
   },
   mounted() {
-    this.profile_mode = this.$route.name == this.route + ".profile";
-    if (this.profile_mode) {
-      this.id = this.auth.user.id;
-    }
-
+    console.log(this.id);
     this.getItem();
   },
 };

@@ -5,7 +5,7 @@
     top
     elevation="12"
     :color="color"
-    timeout="4000"
+    timeout="5500"
     transition="slide-y-transition"
   >
     <div class="text-center">

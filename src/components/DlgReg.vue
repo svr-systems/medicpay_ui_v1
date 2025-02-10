@@ -28,9 +28,6 @@
       </v-card-title>
       <v-card-text v-if="item">
         <v-row dense>
-          <v-col cols="12">
-            <VisVal :val="item.id" lab="ID" />
-          </v-col>
           <v-col cols="6">
             <VisVal
               :val="item.created_by.email"

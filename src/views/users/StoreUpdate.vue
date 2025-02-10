@@ -1,14 +1,12 @@
 <template>
-  <v-card flat :disabled="ldg" :loading="ldg">
+  <v-card elevation="24" :disabled="ldg" :loading="ldg">
     <v-card-title>
       <v-row dense>
         <v-col cols="8">
           <BtnBack
             :route="{
-              name:
-                route +
-                (!profile_mode ? (store_mode ? '' : '.show') : '.profile'),
-              params: { id: id },
+              name: route + (store_mode ? '' : '.show'),
+              params: { id: $window.btoa(id) },
             }"
           />
           <CardTitle :text="$route.meta.title" :icon="$route.meta.icon" />
@@ -24,55 +22,59 @@
               <v-card-title class="card_title_border">
                 <v-row dense>
                   <v-col cols="8">
-                    <CardTitle text="GENERAL" sub />
+                    <CardTitle
+                      :text="'GENERAL' + (store_mode ? '' : ' | ' + item.uiid)"
+                      sub
+                    />
                   </v-col>
                   <v-col cols="4" class="text-right" />
                 </v-row>
               </v-card-title>
               <v-card-text>
                 <v-row dense>
-                  <v-col cols="12" sm="12" md="3">
+                  <v-col cols="12" md="3">
                     <v-text-field
                       v-model="item.name"
                       label="Nombre"
                       dense
                       outlined
                       type="text"
-                      :rules="rules.required"
+                      :rules="rules.txt_rqd"
                       maxlength="50"
                       counter
                     />
                   </v-col>
-                  <v-col cols="12" sm="12" md="3">
+                  <v-col cols="12" md="3">
                     <v-text-field
                       v-model="item.surname_p"
                       label="A. paterno"
                       dense
                       outlined
                       type="text"
-                      :rules="rules.required"
+                      :rules="rules.txt_rqd"
                       maxlength="25"
                       counter
                     />
                   </v-col>
-                  <v-col cols="12" sm="12" md="3">
+                  <v-col cols="12" md="3">
                     <v-text-field
                       v-model="item.surname_m"
                       label="A. materno*"
                       dense
                       outlined
                       type="text"
+                      :rules="rules.txt"
                       maxlength="25"
                       counter
                     />
                   </v-col>
-                  <v-col cols="12" sm="12" md="3">
+                  <v-col cols="12" md="3">
                     <v-file-input
                       v-model="item.avatar_doc"
-                      label="Fotografía (IMG)*"
+                      label="Fotografía*"
                       dense
                       outlined
-                      :rules="rules.imgLmtNR"
+                      :rules="rules.img"
                       show-size
                       prepend-icon=""
                       accept=".jpg,.jpeg,.png"
@@ -121,34 +123,26 @@
               </v-card-title>
               <v-card-text>
                 <v-row dense>
-                  <v-col cols="12" sm="12" md="3">
+                  <v-col cols="12" md="3">
                     <v-text-field
                       v-model="item.email"
                       label="E-mail"
                       dense
                       outlined
                       type="text"
-                      :rules="rules.email"
+                      :rules="rules.email_rqd"
                       maxlength="65"
                       counter
-                      prepend-icon="mdi-account"
+                      prepend-icon="mdi-at"
                     />
                   </v-col>
-                  <v-col v-if="store_mode" cols="12" sm="12" md="3">
-                    <InpPassword
-                      :model.sync="item.password"
-                      label="Contraseña"
-                      :rules="rules.password"
-                      counter
-                    />
-                  </v-col>
-                  <v-col cols="12" sm="12" md="3">
+                  <v-col cols="12" md="3">
                     <v-select
                       v-model="item.role_id"
                       label="Rol"
                       dense
                       outlined
-                      :rules="rules.required"
+                      :rules="rules.rqd"
                       :items="roles"
                       :item-text="(v) => v.name"
                       item-value="id"
@@ -192,28 +186,26 @@ import {
   getRules,
   getObj,
   getFormData,
-} from "@/exports";
+} from "@/general";
+import { getUserObj } from "@/objects";
 import Axios from "axios";
 import BtnBack from "@/components/BtnBack.vue";
 import CardTitle from "@/components/CardTitle.vue";
 import BtnDwd from "@/components/BtnDwd.vue";
-import InpPassword from "@/components/InpPassword.vue";
 
 export default {
   components: {
     BtnBack,
     CardTitle,
     BtnDwd,
-    InpPassword,
   },
 
   data() {
     return {
       route: "users",
-      id:
-        this.$route.params && this.$route.params.id
-          ? this.$route.params.id
-          : null,
+      id: this.$route.params.id
+        ? this.$window.atob(this.$route.params.id)
+        : null,
       auth: this.$store.getters.getAuth,
       ldg: true,
       store_mode: true,
@@ -223,12 +215,11 @@ export default {
       roles: [],
       roles_ldg: true,
       //OTHERS
-      profile_mode: true,
     };
   },
   methods: {
     getCatalogs() {
-      Axios.get(URL_API + "/roles", getHdrs(this.auth.token))
+      Axios.get(URL_API + "/system/roles", getHdrs(this.auth.token))
         .then((rsp) => {
           rsp = getRsp(rsp);
           this.roles = rsp.data.items;
@@ -243,23 +234,12 @@ export default {
       this.store_mode = this.id == null;
 
       if (this.store_mode) {
-        this.item = {
-          id: null,
-          name: null,
-          surname_p: null,
-          surname_m: null,
-          avatar: null,
-          avatar_doc: null,
-          avatar_dlt: false,
-          email: null,
-          password: null,
-          role_id: null,
-        };
+        this.item = getUserObj();
 
         this.ldg = false;
       } else {
         Axios.get(
-          URL_API + "/" + this.route + "/" + this.id,
+          URL_API + "/system/" + this.route + "/" + this.id,
           getHdrs(this.auth.token)
         )
           .then((rsp) => {
@@ -278,19 +258,16 @@ export default {
           .$confirm(
             "¿Confirma " +
               (this.store_mode ? "agregar" : "editar") +
-              " " +
-              (this.profile_mode ? "perfil" : "registro") +
-              "?"
+              " registro?"
           )
-          .then((confirmed) => {
-            if (confirmed) {
+          .then((confirm) => {
+            if (confirm) {
               this.ldg = true;
               let obj = getObj(this.item, this.store_mode);
-              obj.profile_mode = this.profile_mode;
 
               Axios.post(
                 URL_API +
-                  "/" +
+                  "/system/" +
                   this.route +
                   (this.store_mode ? "" : "/" + obj.id),
                 getFormData(obj),
@@ -300,17 +277,15 @@ export default {
                   rsp = getRsp(rsp);
                   this.$root.$alert("success", rsp.msg);
 
-                  if (this.profile_mode) {
-                    this.$store.dispatch("profileAction", rsp.data.item);
-                  }
-
                   this.$router.push({
-                    name:
-                      this.route + (!this.profile_mode ? ".show" : ".profile"),
+                    name: this.route + ".show",
                     params: {
-                      id: this.store_mode ? rsp.data.item.id : this.id,
+                      id: this.$window.btoa(
+                        this.store_mode ? rsp.data.item.id : this.id
+                      ),
                     },
                   });
+
                   this.ldg = false;
                 })
                 .catch((err) => {
@@ -325,11 +300,6 @@ export default {
     },
   },
   mounted() {
-    this.profile_mode = this.$route.name == this.route + ".profile_update";
-    if (this.profile_mode) {
-      this.id = this.auth.user.id;
-    }
-
     this.getCatalogs();
     this.getItem();
   },

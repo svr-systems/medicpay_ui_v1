@@ -1,5 +1,5 @@
 <template>
-  <v-card flat :disabled="ldg">
+  <v-card elevation="24" :disabled="ldg">
     <v-card-title>
       <v-row dense>
         <v-col cols="8">
@@ -26,11 +26,42 @@
       </v-row>
     </v-card-title>
     <v-card-text>
-      <v-row dense justify="end">
-        <v-col cols="12" md="2">
+      <v-row dense>
+        <v-col cols="12" md="9" class="pb-0">
+          <v-row dense>
+            <v-col
+              v-if="auth.user.role_id == 1 || auth.user.role_id == 2"
+              cols="12"
+              md="3"
+              class="pb-0"
+            >
+              <v-select
+                v-model="active"
+                label="Mostrar"
+                dense
+                :items="active_opts"
+                :item-text="(v) => v.name"
+                item-value="id"
+                :disabled="items.length > 0"
+              />
+            </v-col>
+            <v-col cols="12" md="3" class="pb-0">
+              <v-select
+                v-model="filter"
+                label="Filtro"
+                dense
+                :items="filter_opts"
+                :item-text="(v) => v.name"
+                item-value="id"
+                :disabled="items.length > 0"
+              />
+            </v-col>
+          </v-row>
+        </v-col>
+        <v-col cols="12" md="3" class="pb-0">
           <v-text-field
             v-model="items_srch"
-            label="Buscar..."
+            label="Buscar en resultados..."
             dense
             type="text"
             single-line
@@ -40,6 +71,23 @@
               <v-icon small> mdi-magnify </v-icon>
             </template>
           </v-text-field>
+        </v-col>
+        <v-col cols="12">
+          <v-btn
+            v-if="items.length == 0"
+            block
+            color="info"
+            x-small
+            :loading="ldg"
+            @click.prevent="getItems"
+          >
+            Aplicar parámetros
+            <v-icon x-small right> mdi-database-search-outline </v-icon>
+          </v-btn>
+          <v-btn v-else block x-small @click.prevent="items = []">
+            Cambiar parámetros
+            <v-icon x-small right> mdi-database-refresh-outline </v-icon>
+          </v-btn>
         </v-col>
       </v-row>
       <v-row dense>
@@ -55,21 +103,18 @@
             <template v-slot:item.key="{ item }">
               <b v-text="item.key + 1" />
             </template>
-            <template v-slot:item.avatar="{ item }">
-              <VisAvatar :val="item.avatar_b64" />
-            </template>
             <template v-slot:item.action="{ item }">
               <div class="text-right">
-                <v-tooltip v-if="true" left>
+                <v-tooltip left>
                   <template v-slot:activator="{ on }">
                     <v-btn
                       v-on="on"
                       icon
-                      x-small
-                      color="primary"
+                      small
+                      :color="item.active ? '' : 'error'"
                       :to="{
                         name: route + '.show',
-                        params: { id: item.id },
+                        params: { id: $window.btoa(item.id) },
                       }"
                     >
                       <v-icon small> mdi-eye </v-icon>
@@ -87,15 +132,13 @@
 </template>
 
 <script>
-import { URL_API, getHdrs, getRsp, getErr } from "@/exports";
+import { URL_API, getHdrs, getRsp, getErr } from "@/general";
 import Axios from "axios";
 import CardTitle from "@/components/CardTitle.vue";
-import VisAvatar from "@/components/VisAvatar.vue";
 
 export default {
   components: {
     CardTitle,
-    VisAvatar,
   },
   data() {
     return {
@@ -105,6 +148,12 @@ export default {
       items: [],
       items_srch: "",
       items_hdrs: [],
+      active: 1,
+      active_opts: [],
+      filter: 0,
+      filter_opts: [],
+      //CATALOGS
+      //OTHERS
     };
   },
   methods: {
@@ -112,10 +161,27 @@ export default {
       this.ldg = true;
       this.items = [];
 
-      Axios.get(URL_API + "/" + this.route, getHdrs(this.auth.token))
+      Axios.get(
+        URL_API +
+          "/system/" +
+          this.route +
+          "?active=" +
+          this.active +
+          "&filter=" +
+          this.filter,
+        getHdrs(this.auth.token)
+      )
         .then((rsp) => {
           rsp = getRsp(rsp);
           this.items = rsp.data.items;
+
+          if (!this.items.length) {
+            this.$root.$alert(
+              "warning",
+              "Sin resultados al aplicar parámetros"
+            );
+          }
+
           this.ldg = false;
         })
         .catch((err) => {
@@ -125,34 +191,47 @@ export default {
     },
   },
   mounted() {
+    this.active_opts = [
+      {
+        id: 1,
+        name: "ACTIVOS",
+      },
+      {
+        id: 0,
+        name: "INACTIVOS",
+      },
+    ];
+
+    this.filter_opts = [
+      {
+        id: 0,
+        name: "TODOS",
+      },
+    ];
+
     this.items_hdrs = [
       {
-        value: "key",
         text: "#",
+        value: "key",
         filterable: false,
+        sortable: false,
         width: "60",
       },
       {
-        value: "avatar",
-        text: "",
-        filterable: false,
-        width: "22",
-        sortable: false,
+        text: "ID",
+        value: "uiid",
       },
       {
-        value: "full_name",
         text: "Nombre",
-        filterable: true,
+        value: "full_name",
       },
       {
-        value: "email",
         text: "E-mail",
-        filterable: true,
+        value: "email",
       },
       {
-        value: "role.name",
         text: "Rol",
-        filterable: true,
+        value: "role.name",
       },
       {
         value: "action",
@@ -162,8 +241,6 @@ export default {
         width: "60",
       },
     ];
-
-    this.getItems();
   },
 };
 </script>
