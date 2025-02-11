@@ -51,7 +51,7 @@
                 </div>
               </v-col>
               <v-col cols="12" class="mt-1">
-                <small>{{ app_version }}</small>
+                <small>V{{ app_version }}</small>
               </v-col>
             </v-row>
           </v-form>

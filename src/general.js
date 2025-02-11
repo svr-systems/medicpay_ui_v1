@@ -1,5 +1,5 @@
-export const APP_VERSION = "1.02.09";
-export const APP_NAME = "SVR-APP";
+export const APP_VERSION = "1.25.0210";
+export const APP_NAME = "MEDICPAY";
 
 const URL = "http://127.0.0.1:8000";
 export const URL_API = URL + "/api";

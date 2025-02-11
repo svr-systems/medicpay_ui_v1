@@ -1,6 +1,6 @@
 {
-  "name": "svr_app",
-  "version": "1.00.00",
+  "name": "medicpay",
+  "version": "1.00.0000",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",

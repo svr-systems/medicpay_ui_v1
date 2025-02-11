@@ -55,7 +55,7 @@
         <v-list-item-content>
           <v-list-item-title>
             <small>
-              {{ app_version }}
+              V{{ app_version }}
             </small>
           </v-list-item-title>
         </v-list-item-content>
